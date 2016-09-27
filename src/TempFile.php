@@ -91,6 +91,7 @@ class TempFile extends \SplTempFileObject {
      * Builds, sends and afterwards returns a Response object.
      *
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws TempFileException
      */
     public function send() {
 
@@ -111,14 +112,21 @@ class TempFile extends \SplTempFileObject {
             throw new TempFileException('Could not find class "\Symfony\Component\HttpFoundation\Response".');
         }
 
-        $response = new \Symfony\Component\HttpFoundation\Response();
-        $response->setContent($this->getContent());
-        $response->setLastModified(new \DateTime());
-        $response->headers->set('Content-Disposition', sprintf('attachment; filename=%s', rawurlencode($fileName)));
-        $response->headers->set('Content-Length', $this->getSize());
-        $response->headers->set('Content-Type', $this->detectMime() ?: 'application/octet-stream');
+        try {
 
-        return $response;
+            $response = new \Symfony\Component\HttpFoundation\Response();
+            $response->setContent($this->getContent());
+            $response->setLastModified(new \DateTime());
+            $response->headers->set('Content-Disposition', sprintf('attachment; filename=%s', rawurlencode($fileName)));
+            $response->headers->set('Content-Length', $this->getSize());
+            $response->headers->set('Content-Type', $this->detectMime() ?: 'application/octet-stream');
+
+            return $response;
+        }
+        catch(\Exception $e) {
+
+            throw new TempFileException('Could not create response.', 0, $e);
+        }
     }
 
 
