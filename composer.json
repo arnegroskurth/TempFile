@@ -13,12 +13,20 @@
   "require": {
     "php": "^5.3|^7.0"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^5.5"
+  },
   "suggest": {
     "symfony/http-foundation": "^3.1"
   },
   "autoload": {
     "psr-4": {
       "ArneGroskurth\\TempFile\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ArneGroskurth\\TempFile\\Tests\\": "tests/"
     }
   }
 }
