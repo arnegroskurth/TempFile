@@ -1,6 +1,6 @@
 # TempFile
 
-TempFile is an extension to [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing additional functions for sending HTTP responses and persisting.
+TempFile is a small library inspired by the [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing solutions for commonly occurring problems when dealing with temporary files.
 
 
 ## Installation
@@ -11,7 +11,7 @@ TempFile is available on [Packagist](https://packagist.org/packages/arne-groskur
 $ composer require arne-groskurth/temp-file
 ```
 
-TempFile suggests also using the [symfony/http-foundation](https://github.com/symfony/http-foundation) package to have a convenient wrapper for HTTP responses.
+TempFile suggests also installing the [symfony/http-foundation](https://github.com/symfony/http-foundation) to be able to directly convert temporary files to HTTP response objects.
 
 
 ## Example
@@ -23,7 +23,7 @@ use ArneGroskurth\TempFile\TempFile;
 
 $tempFile = new TempFile();
 
-// TempFile inherits all commonly available file-functions from SplFileObject 
+// TempFile offers all commonly used file-related functions including fread, fwrite, ftell, fseek and feof.
 $tempFile->fwrite('Hello World!');
 
 // Construct response object and write to stdout

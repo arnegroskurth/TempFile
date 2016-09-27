@@ -3,7 +3,101 @@
 namespace ArneGroskurth\TempFile;
 
 
-class TempFile extends \SplTempFileObject {
+class TempFile {
+
+    /**
+     * @var string
+     */
+    protected $filePath;
+
+    /**
+     * @var resource
+     */
+    protected $fileHandle;
+
+
+    /**
+     * @throws TempFileException
+     */
+    public function __construct() {
+
+        $this->filePath = tempnam(sys_get_temp_dir(), 'TempFile-');
+        $this->fileHandle = fopen($this->filePath, 'w+');
+
+        if(!$this->fileHandle) {
+
+            throw new TempFileException('Could not create temporary file.');
+        }
+    }
+
+
+    public function __destruct() {
+
+        @fclose($this->fileHandle);
+        @unlink($this->filePath);
+    }
+
+
+    /**
+     * @return int
+     */
+    public function ftell() {
+
+        return ftell($this->fileHandle);
+    }
+
+
+    /**
+     * @param int $offset
+     * @param int $whence
+     *
+     * @return int
+     */
+    public function fseek($offset, $whence = SEEK_SET) {
+
+        return fseek($this->fileHandle, $offset, $whence);
+    }
+
+
+    /**
+     * @param int $length
+     *
+     * @return string
+     */
+    public function fread($length) {
+
+        return fread($this->fileHandle, $length);
+    }
+
+
+    /**
+     * @param string $string
+     * @param int $length
+     *
+     * @return int
+     */
+    public function fwrite($string, $length = null) {
+
+        if($length === null) {
+
+            return fwrite($this->fileHandle, $string);
+        }
+
+        else {
+
+            return fwrite($this->fileHandle, $string, $length);
+        }
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function eof() {
+
+        return feof($this->fileHandle);
+    }
+
 
     /**
      * {@inheritdoc}
