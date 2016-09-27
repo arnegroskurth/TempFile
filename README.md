@@ -1,6 +1,6 @@
 # TempFile
 
-TempFile is an extension to [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing additional functions for sending HTTP responses and persisting the temporary file
+TempFile is an extension to [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing additional functions for sending HTTP responses and persisting.
 
 
 ## Installation

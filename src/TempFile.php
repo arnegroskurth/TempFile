@@ -6,6 +6,21 @@ namespace ArneGroskurth\TempFile;
 class TempFile extends \SplTempFileObject {
 
     /**
+     * {@inheritdoc}
+     */
+    public function getSize() {
+
+        $pos = $this->ftell();
+
+        $this->fseek(0, SEEK_END);
+        $return = $this->ftell();
+        $this->fseek($pos);
+
+        return $return;
+    }
+
+
+    /**
      * Returns file content as string.
      *
      * @return string
@@ -14,8 +29,8 @@ class TempFile extends \SplTempFileObject {
 
         $pos = $this->ftell();
 
+        $this->fseek(0);
         $return = $this->fread($this->getSize());
-
         $this->fseek($pos);
 
         return $return;
