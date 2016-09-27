@@ -95,7 +95,7 @@ class TempFile extends \SplTempFileObject {
         }
 
         $response = new \Symfony\Component\HttpFoundation\Response();
-        $response->setContent($this->fread($this->getSize()));
+        $response->setContent($this->getContent());
         $response->setLastModified(new \DateTime());
         $response->headers->set('Content-Disposition', sprintf('attachment; filename=%s', rawurlencode($fileName)));
         $response->headers->set('Content-Length', $this->getSize());
