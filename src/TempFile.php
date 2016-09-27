@@ -207,11 +207,12 @@ class TempFile {
 
     /**
      * @param string $fileName
+     * @param string $contentType
      *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws TempFileException
      */
-    public function buildResponse($fileName = 'file.tmp') {
+    public function buildResponse($fileName = 'file.tmp', $contentType = null) {
 
         if(!class_exists('\Symfony\Component\HttpFoundation\Response')) {
 
@@ -225,7 +226,7 @@ class TempFile {
             $response->setLastModified(new \DateTime());
             $response->headers->set('Content-Disposition', sprintf('attachment; filename=%s', rawurlencode($fileName)));
             $response->headers->set('Content-Length', $this->getSize());
-            $response->headers->set('Content-Type', $this->detectMime() ?: 'application/octet-stream');
+            $response->headers->set('Content-Type', ($contentType === null) ? ($this->detectMime() ?: 'application/octet-stream') : $contentType);
 
             return $response;
         }
