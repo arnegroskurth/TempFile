@@ -22,12 +22,8 @@ class TempFile {
     public function __construct() {
 
         $this->filePath = tempnam(sys_get_temp_dir(), 'TempFile-');
-        $this->fileHandle = fopen($this->filePath, 'w+');
 
-        if(!$this->fileHandle) {
-
-            throw new TempFileException('Could not create temporary file.');
-        }
+        $this->openFileHandle();
     }
 
 
@@ -63,8 +59,14 @@ class TempFile {
      * @param int $length
      *
      * @return string
+     * @throws TempFileException
      */
     public function fread($length) {
+
+        if(empty($length)) {
+
+            throw new TempFileException('Length argument must be greater then zero.');
+        }
 
         return fread($this->fileHandle, $length);
     }
@@ -75,18 +77,18 @@ class TempFile {
      * @param int $length
      *
      * @return int
+     * @throws TempFileException
      */
     public function fwrite($string, $length = null) {
 
-        if($length === null) {
+        $return = ($length === null) ? fwrite($this->fileHandle, $string) : fwrite($this->fileHandle, $string, $length);
 
-            return fwrite($this->fileHandle, $string);
+        if($return === false) {
+
+            throw new TempFileException('Error writing to temp file.');
         }
 
-        else {
-
-            return fwrite($this->fileHandle, $string, $length);
-        }
+        return $return;
     }
 
 
@@ -118,16 +120,24 @@ class TempFile {
      * Returns file content as string.
      *
      * @return string
+     * @throws TempFileException
      */
     public function getContent() {
 
-        $pos = $this->ftell();
+        $size = $this->getSize();
 
-        $this->fseek(0);
-        $return = $this->fread($this->getSize());
-        $this->fseek($pos);
+        if($size > 0) {
 
-        return $return;
+            $pos = $this->ftell();
+
+            $this->fseek(0);
+            $return = $this->fread($size);
+            $this->fseek($pos);
+
+            return $return;
+        }
+
+        return '';
     }
 
 
@@ -164,13 +174,15 @@ class TempFile {
 
         $file = new \SplFileObject($path, 'w+');
 
-        for($pos = $this->ftell(), $this->fseek(0); !$this->eof();) {
+        $pos = $this->ftell();
+
+        for($this->fseek(0); !$this->eof();) {
 
             $file->fwrite($this->fread($chunkSize));
         }
 
         $this->fseek($pos);
-        $file->seek(0);
+        $file->fseek(0);
 
         if($mode !== null && !chmod($path, $mode)) {
 
@@ -221,6 +233,50 @@ class TempFile {
 
             throw new TempFileException('Could not create response.', 0, $e);
         }
+    }
+
+
+    /**
+     * Executes a given callback function
+     *
+     * @param callable $callback
+     *
+     * @return $this
+     * @throws TempFileException
+     */
+    public function accessPath(callable $callback) {
+
+        if(!fflush($this->fileHandle)) {
+
+            throw new TempFileException('Could not flush temporary file contents to disk.');
+        }
+
+        if(!fclose($this->fileHandle)) {
+
+            throw new TempFileException();
+        }
+
+        call_user_func($callback, $this->filePath);
+
+        $this->openFileHandle('r+');
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $mode
+     *
+     * @throws TempFileException
+     */
+    protected function openFileHandle($mode = 'w+') {
+
+        if(!($fileHandle = fopen($this->filePath, $mode))) {
+
+            throw new TempFileException('Could not open file handle to temporary file.');
+        }
+
+        $this->fileHandle = $fileHandle;
     }
 
 

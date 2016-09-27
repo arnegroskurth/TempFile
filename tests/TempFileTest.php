@@ -77,8 +77,16 @@ class TempFileTest extends \PHPUnit_Framework_TestCase {
 
         $file = $tempFile->persist();
 
+        // content got copied correctly
         static::assertEquals(md5($testContent), md5(file_get_contents($file->getPathname())));
 
+        unset($tempFile);
+
+        // persisted file exists after temporary file has been destroyed
+        static::assertTrue(is_file($file->getPathname()));
+
+
+        // cleanup
         $path = $file->getPathname();
         unset($file);
         unlink($path);
@@ -97,6 +105,22 @@ class TempFileTest extends \PHPUnit_Framework_TestCase {
         $tempFile = TempFile::fromFile($filePath);
 
         static::assertEquals(md5($testContent), md5($tempFile->getContent()));
+    }
+
+
+    public function testRemoval() {
+
+        $tempFile = new TempFile();
+        $tempFile->accessPath(function($path) use (&$tempFilePath) {
+
+            $tempFilePath = $path;
+        });
+
+        static::assertTrue(is_file($tempFilePath));
+
+        unset($tempFile);
+
+        static::assertFalse(is_file($tempFilePath));
     }
 
 

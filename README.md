@@ -30,6 +30,19 @@ $tempFile->fwrite('Hello World!');
 // (Requires installation of package "symfony/http-foundation")
 $tempFile->send();
 
+// Obtain path-based access to temporary file within callback function
+$tempFile->accessPath(function($path) {
+    
+    $content = file_get_contents($path);
+    
+    $content = str_replace('Hello World!', 'Got you!', $content);
+    
+    file_put_contents($path, $content);
+});
+
+// Echos 'Got yout!'
+print $tempFile->getContent();
+
 // Persist temporary file to some path
 $tempFile->persist('/my/path/filename.ext');
 ```
