@@ -68,13 +68,15 @@ class TempFile extends \SplTempFileObject {
             $path = tempnam(sys_get_temp_dir(), 'TempFile-');
         }
 
-        $file = new \SplFileObject($path);
+        $file = new \SplFileObject($path, 'w+');
 
         for($pos = $this->ftell(), $this->fseek(0); !$this->eof();) {
 
             $file->fwrite($this->fread($chunkSize));
         }
+
         $this->fseek($pos);
+        $file->seek(0);
 
         if($mode !== null && !chmod($path, $mode)) {
 
