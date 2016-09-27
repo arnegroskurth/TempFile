@@ -1,0 +1,24 @@
+{
+  "name": "arne-groskurth/temp-file",
+  "description": "TempFile is an extension to SplTempFileObject providing additional functions for sending http responses and persisting the temporary file.",
+  "keywords": ["temp", "file", "splfileobject"],
+  "homepage": "https://github.com/arnegroskurth/TempFile",
+  "authors": [
+    {
+      "name": "Arne Groskurth",
+      "email": "arne.groskurth@gears9.de"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": "^5.3|^7.0"
+  },
+  "suggest": {
+    "symfony/http-foundation": "^3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "ArneGroskurth\\TempFile\\": "src/"
+    }
+  }
+}
