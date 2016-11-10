@@ -165,7 +165,7 @@ class TempFile {
      * @return \SplFileObject
      * @throws TempFileException
      */
-    public function persist($path = null, $mode = 0600, $chunkSize = 4096) {
+    public function persist($path = null, $mode = null, $chunkSize = 4096) {
 
         if($path === null) {
 
