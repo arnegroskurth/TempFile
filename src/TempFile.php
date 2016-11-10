@@ -15,22 +15,29 @@ class TempFile {
      */
     protected $fileHandle;
 
+    /**
+     * @var bool
+     */
+    protected $doUnlinkOnDestruction = true;
+
 
     /**
      * @throws TempFileException
      */
     public function __construct() {
 
-        $this->filePath = tempnam(sys_get_temp_dir(), 'TempFile-');
-
-        $this->openFileHandle();
+        $this->filePath = $this->generateTempFilePath();
     }
 
 
     public function __destruct() {
 
-        @fclose($this->fileHandle);
-        @unlink($this->filePath);
+        $this->closeFileHandle();
+
+        if($this->doUnlinkOnDestruction) {
+
+            @unlink($this->filePath);
+        }
     }
 
 
@@ -38,6 +45,8 @@ class TempFile {
      * @return int
      */
     public function ftell() {
+
+        $this->openFileHandle();
 
         return ftell($this->fileHandle);
     }
@@ -50,6 +59,8 @@ class TempFile {
      * @return int
      */
     public function fseek($offset, $whence = SEEK_SET) {
+
+        $this->openFileHandle();
 
         return fseek($this->fileHandle, $offset, $whence);
     }
@@ -68,6 +79,8 @@ class TempFile {
             throw new TempFileException('Length argument must be greater then zero.');
         }
 
+        $this->openFileHandle();
+
         return fread($this->fileHandle, $length);
     }
 
@@ -80,6 +93,8 @@ class TempFile {
      * @throws TempFileException
      */
     public function fwrite($string, $length = null) {
+
+        $this->openFileHandle();
 
         $return = ($length === null) ? fwrite($this->fileHandle, $string) : fwrite($this->fileHandle, $string, $length);
 
@@ -96,6 +111,8 @@ class TempFile {
      * @return bool
      */
     public function eof() {
+
+        $this->openFileHandle();
 
         return feof($this->fileHandle);
     }
@@ -155,41 +172,77 @@ class TempFile {
 
 
     /**
-     * Writes temporary file contents to a persistent file.
+     * Moves temporary file to a persistent file under the given path.
+     * Subsequent calls to fwrite() on this object will be applied to the persisted file.
      * Path parameter defaults to some path inside sys_get_temp_dir() which is generally wiped on system start.
      *
      * @param string $path
-     * @param int $mode
-     * @param int $chunkSize
+     * @param int $chmod
      *
      * @return \SplFileObject
      * @throws TempFileException
      */
-    public function persist($path = null, $mode = null, $chunkSize = 4096) {
+    public function persist($path = null, $chmod = null) {
 
         if($path === null) {
 
-            $path = tempnam(sys_get_temp_dir(), 'TempFile-');
+            $path = $this->generateTempFilePath();
         }
 
-        $file = new \SplFileObject($path, 'w+');
+        if($this->fileHandle !== null) {
 
-        $pos = $this->ftell();
-
-        for($this->fseek(0); !$this->eof();) {
-
-            $file->fwrite($this->fread($chunkSize));
+            fflush($this->fileHandle);
         }
 
-        $this->fseek($pos);
-        $file->fseek(0);
+        if(!rename($this->filePath, $path)) {
 
-        if($mode !== null && !chmod($path, $mode)) {
+            throw new TempFileException(sprintf('Could not persist temporary file to %s.', $path));
+        }
+
+        $this->doUnlinkOnDestruction = false;
+
+        if($chmod !== null && !chmod($path, $chmod)) {
 
             throw new TempFileException('Could not chmod() persisted file.');
         }
 
-        return $file;
+        return new \SplFileObject($path, 'r+');
+    }
+
+
+    /**
+     * Writes temporary file contents to a persistent file.
+     * Path parameter defaults to some path inside sys_get_temp_dir() which is generally wiped on system start.
+     *
+     * @param string $path
+     * @param int $chmod
+     *
+     * @return \SplFileObject
+     * @throws TempFileException
+     */
+    public function persistCopy($path = null, $chmod = null) {
+
+        if($path === null) {
+
+            $path = $this->generateTempFilePath();
+        }
+
+        if($this->fileHandle !== null) {
+
+            fflush($this->fileHandle);
+        }
+
+        if(!copy($this->filePath, $path)) {
+
+            throw new TempFileException(sprintf('Could not persist temporary file to %s.', $path));
+        }
+
+        if($chmod !== null && !chmod($path, $chmod)) {
+
+            throw new TempFileException('Could not chmod() persisted file.');
+        }
+
+        return new \SplFileObject($path, 'r+');
     }
 
 
@@ -247,19 +300,9 @@ class TempFile {
      */
     public function accessPath(callable $callback) {
 
-        if(!fflush($this->fileHandle)) {
-
-            throw new TempFileException('Could not flush temporary file contents to disk.');
-        }
-
-        if(!fclose($this->fileHandle)) {
-
-            throw new TempFileException();
-        }
+        $this->closeFileHandle();
 
         call_user_func($callback, $this->filePath);
-
-        $this->openFileHandle('r+');
 
         return $this;
     }
@@ -272,39 +315,68 @@ class TempFile {
      */
     protected function openFileHandle($mode = 'w+') {
 
-        if(!($fileHandle = fopen($this->filePath, $mode))) {
+        if($this->fileHandle === null) {
 
-            throw new TempFileException('Could not open file handle to temporary file.');
+            if(!($fileHandle = fopen($this->filePath, $mode))) {
+
+                throw new TempFileException('Could not open file handle to temporary file.');
+            }
+
+            $this->fileHandle = $fileHandle;
         }
+    }
 
-        $this->fileHandle = $fileHandle;
+
+    /**
+     * @throws TempFileException
+     */
+    protected function closeFileHandle() {
+
+        if($this->fileHandle !== null) {
+
+            if(!fclose($this->fileHandle)) {
+
+                throw new TempFileException();
+            }
+
+            $this->fileHandle = null;
+        }
+    }
+
+
+    /**
+     * @return string
+     */
+    protected function generateTempFilePath() {
+
+        return tempnam(sys_get_temp_dir(), 'TempFile-');
     }
 
 
     /**
      * Returns a TempFile object representing a copy of an existing file.
+     * The file pointer is set to the beginning to the file.
      *
      * @param string $path
-     * @param int $chunkSize
      *
      * @return TempFile
      * @throws TempFileException
      */
-    public static function fromFile($path, $chunkSize = 4096) {
+    public static function fromFile($path) {
 
         if(!is_file($path) || !is_readable($path)) {
 
-            throw new TempFileException(sprintf('Could not read in file "%s".', $path));
+            throw new TempFileException(sprintf('File %s does not exist or is not readable.', $path));
         }
-
-        $file = new \SplFileObject($path, 'r');
 
         $tempFile = new static();
 
-        while(!$file->eof()) {
+        if(!copy($path, $tempFile->filePath)) {
 
-            $tempFile->fwrite($file->fread($chunkSize));
+            throw new TempFileException(sprintf('Could not read in file %s.', $path));
         }
+
+        $tempFile->openFileHandle('r+');
 
         return $tempFile;
     }

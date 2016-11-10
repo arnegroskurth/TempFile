@@ -68,14 +68,47 @@ class TempFileTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-    public function testPersisting() {
+    public function testPersist() {
 
         $testContent = $this->getTestContent();
 
         $tempFile = new TempFile();
         $tempFile->fwrite($testContent);
 
+        $tempFile->accessPath(function($path) use (&$tempFilePath) {
+
+            $tempFilePath = $path;
+        });
+
         $file = $tempFile->persist();
+
+        // content got copied correctly
+        static::assertEquals(md5($testContent), md5(file_get_contents($file->getPathname())));
+
+        // old temporary file does no longer exist
+        static::assertFalse(is_file($tempFilePath));
+
+        unset($tempFile);
+
+        // persisted file exists after temporary file has been destroyed
+        static::assertTrue(is_file($file->getPathname()));
+
+
+        // cleanup
+        $path = $file->getPathname();
+        unset($file);
+        unlink($path);
+    }
+
+
+    public function testPersistCopy() {
+
+        $testContent = $this->getTestContent();
+
+        $tempFile = new TempFile();
+        $tempFile->fwrite($testContent);
+
+        $file = $tempFile->persistCopy();
 
         // content got copied correctly
         static::assertEquals(md5($testContent), md5(file_get_contents($file->getPathname())));
