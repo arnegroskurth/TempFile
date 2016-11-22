@@ -157,6 +157,20 @@ class TempFileTest extends \PHPUnit_Framework_TestCase {
     }
 
 
+    public function testAccessPath() {
+
+        $testContent = $this->getTestContent();
+
+        $tempFile = new TempFile();
+        $tempFile->accessPath(function($path) use ($testContent) {
+
+            file_put_contents($path, $testContent);
+        });
+
+        static::assertEquals($testContent, $tempFile->getContent());
+    }
+
+
     protected function getTestContent($length = 16384) {
 
         if(function_exists('openssl_random_pseudo_bytes ')) {

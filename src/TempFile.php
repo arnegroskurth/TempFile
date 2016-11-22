@@ -27,6 +27,8 @@ class TempFile {
     public function __construct() {
 
         $this->filePath = $this->generateTempFilePath();
+
+        $this->openFileHandle();
     }
 
 
@@ -46,8 +48,6 @@ class TempFile {
      */
     public function ftell() {
 
-        $this->openFileHandle();
-
         return ftell($this->fileHandle);
     }
 
@@ -59,8 +59,6 @@ class TempFile {
      * @return int
      */
     public function fseek($offset, $whence = SEEK_SET) {
-
-        $this->openFileHandle();
 
         return fseek($this->fileHandle, $offset, $whence);
     }
@@ -79,8 +77,6 @@ class TempFile {
             throw new TempFileException('Length argument must be greater then zero.');
         }
 
-        $this->openFileHandle();
-
         return fread($this->fileHandle, $length);
     }
 
@@ -93,8 +89,6 @@ class TempFile {
      * @throws TempFileException
      */
     public function fwrite($string, $length = null) {
-
-        $this->openFileHandle();
 
         $return = ($length === null) ? fwrite($this->fileHandle, $string) : fwrite($this->fileHandle, $string, $length);
 
@@ -111,8 +105,6 @@ class TempFile {
      * @return bool
      */
     public function eof() {
-
-        $this->openFileHandle();
 
         return feof($this->fileHandle);
     }
@@ -189,17 +181,17 @@ class TempFile {
             $path = $this->generateTempFilePath();
         }
 
-        if($this->fileHandle !== null) {
-
-            fflush($this->fileHandle);
-        }
+        $this->closeFileHandle();
 
         if(!rename($this->filePath, $path)) {
 
             throw new TempFileException(sprintf('Could not persist temporary file to %s.', $path));
         }
 
+        $this->filePath = $path;
         $this->doUnlinkOnDestruction = false;
+
+        $this->openFileHandle('r');
 
         if($chmod !== null && !chmod($path, $chmod)) {
 
@@ -227,10 +219,7 @@ class TempFile {
             $path = $this->generateTempFilePath();
         }
 
-        if($this->fileHandle !== null) {
-
-            fflush($this->fileHandle);
-        }
+        fflush($this->fileHandle);
 
         if(!copy($this->filePath, $path)) {
 
@@ -304,6 +293,8 @@ class TempFile {
 
         call_user_func($callback, $this->filePath);
 
+        $this->openFileHandle('r+');
+
         return $this;
     }
 
@@ -315,15 +306,17 @@ class TempFile {
      */
     protected function openFileHandle($mode = 'w+') {
 
-        if($this->fileHandle === null) {
+        if($this->fileHandle !== null) {
 
-            if(!($fileHandle = fopen($this->filePath, $mode))) {
-
-                throw new TempFileException('Could not open file handle to temporary file.');
-            }
-
-            $this->fileHandle = $fileHandle;
+            throw new TempFileException();
         }
+
+        if(!($fileHandle = fopen($this->filePath, $mode))) {
+
+            throw new TempFileException('Could not open file handle to temporary file.');
+        }
+
+        $this->fileHandle = $fileHandle;
     }
 
 
@@ -332,15 +325,19 @@ class TempFile {
      */
     protected function closeFileHandle() {
 
-        if($this->fileHandle !== null) {
+        if($this->fileHandle === null) {
 
-            if(!fclose($this->fileHandle)) {
-
-                throw new TempFileException();
-            }
-
-            $this->fileHandle = null;
+            throw new TempFileException();
         }
+
+        fflush($this->fileHandle);
+
+        if(!fclose($this->fileHandle)) {
+
+            throw new TempFileException();
+        }
+
+        $this->fileHandle = null;
     }
 
 
@@ -370,6 +367,7 @@ class TempFile {
         }
 
         $tempFile = new static();
+        $tempFile->closeFileHandle();
 
         if(!copy($path, $tempFile->filePath)) {
 
