@@ -320,24 +320,19 @@ class TempFile {
     }
 
 
-    /**
-     * @throws TempFileException
-     */
     protected function closeFileHandle() {
 
-        if($this->fileHandle === null) {
+        if($this->fileHandle !== null) {
 
-            throw new TempFileException();
+            fflush($this->fileHandle);
+
+            if(!fclose($this->fileHandle)) {
+
+                throw new TempFileException();
+            }
+
+            $this->fileHandle = null;
         }
-
-        fflush($this->fileHandle);
-
-        if(!fclose($this->fileHandle)) {
-
-            throw new TempFileException();
-        }
-
-        $this->fileHandle = null;
     }
 
 
