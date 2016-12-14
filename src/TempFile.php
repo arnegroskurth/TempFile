@@ -90,6 +90,11 @@ class TempFile {
      */
     public function fwrite($string, $length = null) {
 
+        if($length === 0 || empty($string)) {
+
+            return 0;
+        }
+
         $return = ($length === null) ? fwrite($this->fileHandle, $string) : fwrite($this->fileHandle, $string, $length);
 
         if($return === false) {
