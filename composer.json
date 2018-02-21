@@ -17,6 +17,9 @@
   "require-dev": {
     "phpunit/phpunit": "^5.5"
   },
+  "scripts": {
+    "test": "phpunit --colors=always --verbose"
+  },
   "autoload": {
     "psr-4": {
       "ArneGroskurth\\TempFile\\": "src/"
