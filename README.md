@@ -1,5 +1,9 @@
 # TempFile
 
+[![Build Status](https://travis-ci.org/arnegroskurth/temp-file.svg?branch=master)](https://travis-ci.org/arnegroskurth/temp-file)
+[![codecov](https://codecov.io/gh/arnegroskurth/temp-file/branch/master/graph/badge.svg)](https://codecov.io/gh/arnegroskurth/temp-file)
+[![License](https://poser.pugx.org/agroskurth/temp-file/license)](https://packagist.org/packages/agroskurth/temp-file)
+
 TempFile is a small library inspired by the [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing solutions for commonly occurring problems when dealing with temporary files.
 
 
