@@ -1,6 +1,6 @@
 {
   "name": "arne-groskurth/temp-file",
-  "description": "TempFile is an extension to SplTempFileObject providing additional functions for sending http responses and persisting the temporary file.",
+  "description": "TempFile is a small library inspired by the SplTempFileObject providing solutions for commonly occurring tasks when dealing with temporary files.",
   "keywords": ["temp", "file", "splfileobject"],
   "homepage": "https://github.com/arnegroskurth/TempFile",
   "authors": [
