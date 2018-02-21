@@ -3,18 +3,13 @@
 TempFile is a small library inspired by the [SplTempFileObject](http://php.net/manual/en/class.spltempfileobject.php) providing solutions for commonly occurring problems when dealing with temporary files.
 
 
-## Installation
-
-TempFile is available on [Packagist](https://packagist.org/packages/arne-groskurth/temp-file) and can therefore be installed via Composer:
+## Setup
 
 ```bash
 $ composer require arne-groskurth/temp-file
 ```
 
-TempFile suggests also installing the [symfony/http-foundation](https://github.com/symfony/http-foundation) to be able to directly convert temporary files to HTTP response objects.
-
-
-## Example
+## Usage
 
 ```php
 <?php
