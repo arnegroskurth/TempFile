@@ -29,5 +29,10 @@
     "psr-4": {
       "ArneGroskurth\\TempFile\\Tests\\": "tests/"
     }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "2.x-dev"
+    }
   }
 }
