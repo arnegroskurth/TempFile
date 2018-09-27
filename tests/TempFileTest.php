@@ -126,6 +126,21 @@ class TempFileTest extends \PHPUnit_Framework_TestCase {
     }
 
 
+    public function testPersistToExistingPath() {
+
+        $existingFilePath = tempnam(sys_get_temp_dir(), 'test');
+
+        $this->assertNotFalse(file_put_contents($existingFilePath, 'foo'));
+        $this->assertNotFalse(chmod($existingFilePath, 0000));
+
+        $tempFile = new TempFile();
+        $tempFile->fwrite('bar');
+        $tempFile->persist($existingFilePath);
+
+        $this->assertEquals('bar', file_get_contents($existingFilePath));
+    }
+
+
     public function testFromFile() {
 
         $testContent = $this->getTestContent();
