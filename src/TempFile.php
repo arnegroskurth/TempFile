@@ -188,7 +188,12 @@ class TempFile {
 
         $this->closeFileHandle();
 
-        if(!rename($this->filePath, $path)) {
+        if(is_file($path) && !unlink($path)) {
+
+            throw new TempFileException(sprintf('Destination file already exists and could not be deleted: %s.', $path));
+        }
+
+        if(!copy($this->filePath, $path)) {
 
             throw new TempFileException(sprintf('Could not persist temporary file to %s.', $path));
         }
