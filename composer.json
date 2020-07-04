@@ -11,6 +11,7 @@
   ],
   "license": "MIT",
   "require": {
+    "ext-fileinfo": "*",
     "php": "^5.4|^7.0",
     "symfony/http-foundation": "^3.1|^4.0|^5.0"
   },
