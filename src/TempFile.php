@@ -166,7 +166,7 @@ final class TempFile {
      */
     public function detectMime() {
 
-        $fileInfo = new \finfo(FILEINFO_MIME);
+        $fileInfo = new finfo(FILEINFO_MIME);
 
         return $fileInfo->buffer($this->getContent(), FILEINFO_MIME) ?: null;
     }
