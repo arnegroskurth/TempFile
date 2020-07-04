@@ -2,5 +2,10 @@
 
 namespace ArneGroskurth\TempFile;
 
+use Exception;
 
-class TempFileException extends \Exception {}
+
+class TempFileException extends Exception
+{
+
+}

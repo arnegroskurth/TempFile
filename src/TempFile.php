@@ -2,6 +2,10 @@
 
 namespace ArneGroskurth\TempFile;
 
+use Exception;
+use finfo;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class TempFile {
 
@@ -248,7 +252,7 @@ class TempFile {
     /**
      * Builds, sends and afterwards returns a Response object.
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws TempFileException
      */
     public function send() {
@@ -261,7 +265,7 @@ class TempFile {
      * @param string $fileName
      * @param string $contentType
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws TempFileException
      */
     public function buildResponse($fileName = 'file.tmp', $contentType = null) {
@@ -273,7 +277,7 @@ class TempFile {
 
         try {
 
-            $response = new \Symfony\Component\HttpFoundation\Response();
+            $response = new Response();
             $response->setContent($this->getContent());
             $response->setLastModified(new \DateTime());
             $response->headers->set('Content-Disposition', sprintf('attachment; filename=%s', rawurlencode($fileName)));
@@ -282,7 +286,7 @@ class TempFile {
 
             return $response;
         }
-        catch(\Exception $e) {
+        catch(Exception $e) {
 
             throw new TempFileException('Could not create response.', 0, $e);
         }
