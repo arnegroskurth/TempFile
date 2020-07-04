@@ -7,7 +7,7 @@ use finfo;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class TempFile {
+final class TempFile {
 
     /**
      * @var string

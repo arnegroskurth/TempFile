@@ -5,7 +5,7 @@ namespace ArneGroskurth\TempFile;
 use Exception;
 
 
-class TempFileException extends Exception
+final class TempFileException extends Exception
 {
 
 }
