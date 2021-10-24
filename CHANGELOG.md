@@ -2,6 +2,8 @@
 
 ## [unreleased]
 
+## 1.5.0
+
 - Add: PHP 8 support
 
 ## 1.4.1
