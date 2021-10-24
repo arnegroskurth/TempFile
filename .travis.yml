@@ -4,13 +4,18 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
+  - 7.4
+  - 8.0
 
 before_script:
   - composer self-update
   - composer install --no-interaction
+  - export PHPUNIT_CONFIG=phpunit5.xml;
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} == "8" ]] || [[ ${TRAVIS_PHP_VERSION:0:3} == "7.3" ]] || [[ ${TRAVIS_PHP_VERSION:0:3} == "7.4" ]]; then export PHPUNIT_CONFIG=phpunit.xml; fi;
 
 script:
-  - vendor/bin/phpunit
+  - XDEBUG_MODE=coverage vendor/bin/phpunit -c $PHPUNIT_CONFIG
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)

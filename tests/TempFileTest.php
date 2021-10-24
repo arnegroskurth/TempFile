@@ -3,9 +3,9 @@
 namespace ArneGroskurth\TempFile\Tests;
 
 use ArneGroskurth\TempFile\TempFile;
+use PHPUnit\Framework\TestCase;
 
-
-class TempFileTest extends \PHPUnit_Framework_TestCase {
+class TempFileTest extends TestCase {
 
     public function testWriteRead() {
 
